@@ -7,10 +7,9 @@ module Opensf
     end
 
     def perform
-      role = OpensfAgentRole.find_by(user: @user, account: @account)
-      return nil if role.nil? # not an opensf-managed user, fall through to default
+      return nil if opensf_role.blank?
 
-      case role.role
+      case opensf_role
       when 'manager'
         @conversations
       when 'supervisor'
@@ -23,10 +22,10 @@ module Opensf
     end
 
     def self.broadcast_recipient?(user, conversation)
-      role = OpensfAgentRole.find_by(user: user, account: conversation.account)
-      return true if role.nil? # no opensf role, default behavior
+      role = AccountUser.find_by(user: user, account: conversation.account)&.opensf_role
+      return true if role.blank?
 
-      case role.role
+      case role
       when 'manager'
         true
       when 'supervisor'
@@ -34,10 +33,16 @@ module Opensf
       when 'vendor'
         user.inbox_members.exists?(inbox_id: conversation.inbox_id) &&
           (conversation.assignee_id == user.id || conversation.assignee_id.nil?)
+      else
+        true
       end
     end
 
     private
+
+    def opensf_role
+      @opensf_role ||= AccountUser.find_by(user: @user, account: @account)&.opensf_role
+    end
 
     def member_inbox_ids
       @member_inbox_ids ||= @account.inboxes

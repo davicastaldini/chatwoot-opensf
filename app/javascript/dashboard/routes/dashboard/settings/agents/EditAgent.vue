@@ -38,6 +38,10 @@ const props = defineProps({
     type: Number,
     default: null,
   },
+  opensfRole: {
+    type: String,
+    default: null,
+  },
 });
 
 const emit = defineEmits(['close']);
@@ -51,6 +55,14 @@ const agentName = ref(props.name);
 const agentAvailability = ref(props.availability);
 const selectedRoleId = ref(props.customRoleId || props.type);
 const agentCredentials = ref({ email: props.email });
+const selectedOpensfRole = ref(props.opensfRole || '');
+
+const opensfRoles = [
+  { value: '', label: '— Sem papel OpenSF —' },
+  { value: 'vendor', label: 'Vendedor' },
+  { value: 'supervisor', label: 'Supervisor' },
+  { value: 'manager', label: 'Gerente' },
+];
 
 const rules = {
   agentName: { required, minLength: minLength(1) },
@@ -135,6 +147,8 @@ const editAgent = async () => {
       payload.custom_role_id = null;
     }
 
+    payload.opensf_role = selectedOpensfRole.value || null;
+
     await store.dispatch('agents/update', payload);
     useAlert(t('AGENT_MGMT.EDIT.API.SUCCESS_MESSAGE'));
     emit('close');
@@ -201,6 +215,18 @@ const resetPassword = async () => {
           <span v-if="v$.agentAvailability.$error" class="message">
             {{ $t('AGENT_MGMT.EDIT.FORM.AGENT_AVAILABILITY.ERROR') }}
           </span>
+        </label>
+      </div>
+
+      <!-- OPENSF: papel de visibilidade -->
+      <div class="w-full">
+        <label>
+          Papel OpenSF
+          <select v-model="selectedOpensfRole">
+            <option v-for="r in opensfRoles" :key="r.value" :value="r.value">
+              {{ r.label }}
+            </option>
+          </select>
         </label>
       </div>
 
