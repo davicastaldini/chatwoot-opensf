@@ -226,7 +226,7 @@ export const colors = {
     },
 
     black: '#000000',
-    brand: 'var(--n-brand, #2781F6)', /* OPENSF */
+    brand: '#004880', /* OPENSF: OpenSF primary */
     portal: 'var(--dynamic-portal-color)',
     'portal-soft': 'var(--dynamic-portal-color-soft)',
     'portal-faint': 'var(--dynamic-portal-color-faint)',
