@@ -221,7 +221,7 @@ const resetPassword = async () => {
       <!-- OPENSF: papel de visibilidade -->
       <div class="w-full">
         <label>
-          Papel OpenSF
+          Função
           <select v-model="selectedOpensfRole">
             <option v-for="r in opensfRoles" :key="r.value" :value="r.value">
               {{ r.label }}

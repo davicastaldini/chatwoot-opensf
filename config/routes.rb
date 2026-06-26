@@ -475,6 +475,10 @@ Rails.application.routes.draw do
             end
           end
         end
+        # OPENSF: proposals lookup from external corbee DB
+        namespace :opensf do
+          resources :proposals, only: [:index]
+        end
       end
     end
 
