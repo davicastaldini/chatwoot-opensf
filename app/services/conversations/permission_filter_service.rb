@@ -10,6 +10,10 @@ class Conversations::PermissionFilterService
   def perform
     return conversations if user_role == 'administrator'
 
+    # OPENSF: delegate to role-based scope if user has an opensf role
+    opensf_scoped = Opensf::ConversationScope.new(conversations, user, account).perform
+    return opensf_scoped unless opensf_scoped.nil?
+
     accessible_conversations
   end
 

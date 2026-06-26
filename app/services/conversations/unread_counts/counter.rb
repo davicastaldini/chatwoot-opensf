@@ -149,7 +149,7 @@ class Conversations::UnreadCounts::Counter
   end
 
   def permission_mode
-    @permission_mode ||=
+    @permission_mode ||= opensf_permission_mode ||
       if !custom_role_agent? || permissions.include?(MANAGE_ALL_PERMISSION)
         :base
       elsif permissions.include?(UNASSIGNED_PERMISSION)
@@ -159,6 +159,18 @@ class Conversations::UnreadCounts::Counter
       else
         :none
       end
+  end
+
+  # OPENSF: map opensf roles to existing permission modes
+  def opensf_permission_mode
+    role = OpensfAgentRole.find_by(user: user, account: account)
+    return nil if role.nil?
+
+    case role.role
+    when 'manager' then :base
+    when 'supervisor' then :base
+    when 'vendor' then :unassigned_and_mine
+    end
   end
 
   def custom_role_agent?

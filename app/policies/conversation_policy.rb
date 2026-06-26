@@ -8,7 +8,12 @@ class ConversationPolicy < ApplicationPolicy
   end
 
   def show?
-    administrator? || agent_bot? || agent_can_view_conversation?
+    administrator? || agent_bot? || opensf_can_view? || agent_can_view_conversation?
+  end
+
+  # OPENSF: record-level check matching the query scope
+  def opensf_can_view?
+    Opensf::ConversationScope.broadcast_recipient?(user, record)
   end
 
   private
