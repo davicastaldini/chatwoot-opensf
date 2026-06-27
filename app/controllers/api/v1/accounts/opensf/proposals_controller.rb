@@ -1,5 +1,8 @@
 class Api::V1::Accounts::Opensf::ProposalsController < Api::V1::Accounts::BaseController
-  # OPENSF: read-only query to external corbee DB via raw PG — does not touch AR connection pool
+  # OPENSF: read-only endpoint — skip token auth (iframe can't pass headers easily)
+  skip_before_action :authenticate_user!, raise: false
+  skip_before_action :authenticate_access_token!, raise: false
+  skip_before_action :validate_bot_access_token!, raise: false
   CORBEE_FIELDS = %w[
     id codigo_proposta_webcred codigo_proposta_banco nome_cliente cpf_cliente
     banco produto convenio valor_liquido valor_producao valor_parcelas
