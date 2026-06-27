@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useUISettings } from 'dashboard/composables/useUISettings';
 import { formatNumber } from '@chatwoot/utils';
 import wootConstants from 'dashboard/constants/globals';
@@ -7,6 +7,9 @@ import wootConstants from 'dashboard/constants/globals';
 import ConversationBasicFilter from './widgets/conversation/ConversationBasicFilter.vue';
 import SwitchLayout from 'dashboard/routes/dashboard/conversation/search/SwitchLayout.vue';
 import NextButton from 'dashboard/components-next/button/Button.vue';
+import ComposeConversation from 'dashboard/components-next/NewConversation/ComposeConversation.vue'; // OPENSF:
+
+const showComposeModal = ref(false); // OPENSF:
 
 const props = defineProps({
   pageTitle: { type: String, required: true },
@@ -163,6 +166,21 @@ const toggleConversationLayout = () => {
         :is-on-expanded-layout="isOnExpandedLayout"
         @toggle="toggleConversationLayout"
       />
+      <!-- OPENSF: botão de nova conversa -->
+      <NextButton
+        v-tooltip.right="'Nova conversa'"
+        icon="i-lucide-square-pen"
+        slate
+        xs
+        faded
+        @click="showComposeModal = true"
+      />
     </div>
   </div>
+
+  <!-- OPENSF: modal de nova conversa -->
+  <ComposeConversation
+    v-if="showComposeModal"
+    @modal-closed="showComposeModal = false"
+  />
 </template>
