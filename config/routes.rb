@@ -61,6 +61,10 @@ Rails.application.routes.draw do
           resources :agents, only: [:index, :create, :update, :destroy] do
             post :bulk_create, on: :collection
           end
+          # OPENSF: proposals lookup from external corbee DB
+          namespace :opensf do
+            resources :proposals, only: [:index]
+          end
           namespace :captain do
             resource :preferences, only: [:show, :update]
             resources :assistants do
@@ -474,10 +478,6 @@ Rails.application.routes.draw do
               post :add_participant_to_meeting
             end
           end
-        end
-        # OPENSF: proposals lookup from external corbee DB
-        namespace :opensf do
-          resources :proposals, only: [:index]
         end
       end
     end
