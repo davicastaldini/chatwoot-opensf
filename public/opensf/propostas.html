@@ -280,12 +280,23 @@
   }
 
   window.addEventListener('message', e => {
+    // DEBUG: log everything received
+    console.log('[OPENSF] postMessage received:', JSON.stringify(e.data));
+
     const { event, data } = e.data || {};
     if (event !== 'appContext' || !data) return;
 
     const contact = data.contact || {};
-    const cpf = (contact.custom_attributes || {}).cpf || (contact.additional_attributes || {}).cpf || '';
+    const customAttrs = contact.custom_attributes || {};
+    const additionalAttrs = contact.additional_attributes || {};
+    console.log('[OPENSF] contact:', JSON.stringify(contact));
+    console.log('[OPENSF] custom_attributes:', JSON.stringify(customAttrs));
+    console.log('[OPENSF] additional_attributes:', JSON.stringify(additionalAttrs));
+
+    const cpf = customAttrs.cpf || additionalAttrs.cpf || '';
     const accountId = (data.conversation || {}).account_id || '';
+
+    console.log('[OPENSF] cpf found:', cpf, '| accountId:', accountId);
 
     if (!cpf || !accountId) { show('state-no-cpf'); return; }
     loadProposals(cpf, accountId);
