@@ -29,7 +29,8 @@ class Api::V1::Accounts::Opensf::ProductionController < Api::V1::Accounts::BaseC
         COUNT(*) FILTER (WHERE desc_status_proposta IN ('Pago pelo Banco', 'Averbada'))  AS pagas_count,
         COALESCE(
           SUM(valor_producao) FILTER (WHERE desc_status_proposta IN ('Pago pelo Banco', 'Averbada')), 0
-        )                                                                                AS pagas_valor
+        )                                                                                AS pagas_valor,
+        COALESCE(SUM(comissao_corretor), 0)                                              AS pontuacao
       FROM public.propostas_corbee
       WHERE codigo_corretor::text = $1
         AND data_proposta::date >= $2::date
@@ -45,16 +46,16 @@ class Api::V1::Accounts::Opensf::ProductionController < Api::V1::Accounts::BaseC
     ticket_medio = total > 0 ? producao_total / total : 0.0
     percent_pagas = total > 0 ? (pagas_count.to_f / total * 100).round(2) : 0.0
     projecao = calcular_projecao(pagas_valor)
+    pontuacao = row['pontuacao'].to_f.round(2)
 
     {
       total_propostas: total,
       ticket_medio: ticket_medio.round(2),
-      producao_total: producao_total.round(2),
-      valor_liquido_total: row['valor_liquido_total'].to_f.round(2),
       pagas_count: pagas_count,
       pagas_valor: pagas_valor.round(2),
       percent_pagas: percent_pagas,
       projecao: projecao,
+      pontuacao: pontuacao,
       mes_referencia: Date.today.strftime('%m/%Y')
     }
   ensure

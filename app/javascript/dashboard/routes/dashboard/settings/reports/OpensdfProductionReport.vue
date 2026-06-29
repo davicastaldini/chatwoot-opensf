@@ -199,17 +199,17 @@ onMounted(async () => {
         </p>
       </div>
 
-      <!-- Produção Total -->
+      <!-- Pontuação -->
       <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5">
         <div class="flex items-start justify-between mb-3">
-          <span class="text-sm text-slate-500 dark:text-slate-400 font-medium">Produção Total</span>
-          <span class="i-lucide-dollar-sign text-slate-400 text-lg" />
+          <span class="text-sm text-slate-500 dark:text-slate-400 font-medium">Pontuação</span>
+          <span class="i-lucide-star text-slate-400 text-lg" />
         </div>
         <p class="text-2xl font-bold text-slate-800 dark:text-slate-100">
-          {{ fmt(kpis.producao_total) }}
+          {{ fmtN(kpis.pontuacao) }} pts
         </p>
         <p class="text-xs text-slate-400 mt-2">
-          Valor líquido: {{ fmt(kpis.valor_liquido_total) }}
+          Total de pontos do mês
         </p>
       </div>
 
