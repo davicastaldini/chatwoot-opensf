@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useVuelidate } from '@vuelidate/core';
 import { required, minLength } from '@vuelidate/validators';
 import { useStore, useMapGetter } from 'dashboard/composables/store';
@@ -56,6 +56,8 @@ const agentAvailability = ref(props.availability);
 const selectedRoleId = ref(props.customRoleId || props.type);
 const agentCredentials = ref({ email: props.email });
 const selectedOpensfRole = ref(props.opensfRole || '');
+// OPENSF: código do corretor (Corbee)
+const codigoCorretor = ref('');
 
 const opensfRoles = [
   { value: '', label: '— Sem papel OpenSF —' },
@@ -150,10 +152,45 @@ const editAgent = async () => {
     payload.opensf_role = selectedOpensfRole.value || null;
 
     await store.dispatch('agents/update', payload);
+    await saveCodigoCorretor(); // OPENSF: salva código do corretor
     useAlert(t('AGENT_MGMT.EDIT.API.SUCCESS_MESSAGE'));
     emit('close');
   } catch (error) {
     useAlert(t('AGENT_MGMT.EDIT.API.ERROR_MESSAGE'));
+  }
+};
+
+// OPENSF: fetch and save codigo_corretor via agent_profile endpoint
+const accountId = computed(() => store.getters['auth/getCurrentUser']?.account_id);
+const opensdfProfileUrl = computed(
+  () => `/api/v1/accounts/${accountId.value}/opensf/agent_profile?user_id=${props.id}`
+);
+const accessToken = computed(() => store.getters['auth/getCurrentUser']?.access_token);
+
+onMounted(async () => {
+  try {
+    const res = await fetch(opensdfProfileUrl.value, {
+      headers: { api_access_token: accessToken.value },
+    });
+    const data = await res.json();
+    codigoCorretor.value = data.codigo_corretor || '';
+  } catch {
+    // silently ignore — field starts empty
+  }
+});
+
+const saveCodigoCorretor = async () => {
+  try {
+    await fetch(opensdfProfileUrl.value, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        api_access_token: accessToken.value,
+      },
+      body: JSON.stringify({ codigo_corretor: codigoCorretor.value }),
+    });
+  } catch {
+    // silently ignore — main agent save already succeeded
   }
 };
 
@@ -227,6 +264,18 @@ const resetPassword = async () => {
               {{ r.label }}
             </option>
           </select>
+        </label>
+      </div>
+
+      <!-- OPENSF: código do corretor para relatório de produção -->
+      <div class="w-full">
+        <label>
+          Código do Corretor
+          <input
+            v-model="codigoCorretor"
+            type="text"
+            placeholder="ex: 424"
+          />
         </label>
       </div>
 
