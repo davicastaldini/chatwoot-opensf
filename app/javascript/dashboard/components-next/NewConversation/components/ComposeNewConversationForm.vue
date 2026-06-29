@@ -304,7 +304,12 @@ const clearForm = () => {
 };
 
 const handleSendMessage = async () => {
+  // OPENSF: debug
+  // eslint-disable-next-line no-console
+  console.log('[OPENSF] handleSendMessage called', { selectedContact: props.selectedContact, rawContactInput: props.rawContactInput, targetInbox: props.targetInbox, message: state.message });
   const isValid = await v$.value.$validate();
+  // eslint-disable-next-line no-console
+  console.log('[OPENSF] validation result', isValid, v$.value.$errors);
   if (!isValid) return;
 
   try {
