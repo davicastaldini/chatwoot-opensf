@@ -23,6 +23,8 @@ import CsatResponses from './CsatResponses.vue';
 import BotReports from './BotReports.vue';
 import LiveReports from './LiveReports.vue';
 import SLAReports from './SLAReports.vue';
+// OPENSF: produção individual do agente
+import OpensdfProductionReport from './OpensdfProductionReport.vue';
 
 const meta = {
   featureFlag: FEATURE_FLAGS.REPORTS,
@@ -167,6 +169,13 @@ export default {
           name: 'bot_reports',
           meta,
           component: BotReports,
+        },
+        // OPENSF: produção individual por codigo_corretor
+        {
+          path: 'producao',
+          name: 'opensdf_production_report',
+          meta: { permissions: ['agent', 'administrator', 'report_manage'] },
+          component: OpensdfProductionReport,
         },
       ],
     },

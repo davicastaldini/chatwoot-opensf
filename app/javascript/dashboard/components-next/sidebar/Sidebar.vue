@@ -620,6 +620,12 @@ const menuItems = computed(() => {
           label: t('SIDEBAR.REPORTS_BOT'),
           to: accountScopedRoute('bot_reports'),
         },
+        // OPENSF: produção individual por codigo_corretor
+        {
+          name: 'Minha Produção',
+          label: 'Minha Produção',
+          to: accountScopedRoute('opensdf_production_report'),
+        },
       ],
     },
     {

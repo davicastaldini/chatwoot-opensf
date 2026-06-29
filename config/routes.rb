@@ -61,9 +61,11 @@ Rails.application.routes.draw do
           resources :agents, only: [:index, :create, :update, :destroy] do
             post :bulk_create, on: :collection
           end
-          # OPENSF: proposals lookup from external corbee DB
+          # OPENSF: proposals lookup from external corbee DB + production KPIs
           namespace :opensf do
             resources :proposals, only: [:index]
+            resource :agent_profile, only: [:show, :update]
+            get 'production/kpis', to: 'production#kpis'
           end
           namespace :captain do
             resource :preferences, only: [:show, :update]
