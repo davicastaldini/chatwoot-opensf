@@ -88,10 +88,10 @@ const errorClass = computed(() => {
 });
 
 const handleInput = value => {
-  // Update input type based on whether input starts with '+'
-  // If it does, set input type to 'tel'
-  // Otherwise, set input type to 'email'
-  inputType.value = value.startsWith('+') ? INPUT_TYPES.TEL : INPUT_TYPES.EMAIL;
+  // OPENSF: treat as phone if starts with '+' or with digits (Brazilian numbers without country code)
+  // Original only checked for '+' prefix, but local numbers like '16993287720' also need tel type
+  inputType.value =
+    value.startsWith('+') || /^\d/.test(value) ? INPUT_TYPES.TEL : INPUT_TYPES.EMAIL;
   emit('searchContacts', value);
 };
 </script>
