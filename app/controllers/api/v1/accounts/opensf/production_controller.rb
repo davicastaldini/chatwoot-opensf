@@ -1,7 +1,7 @@
 # OPENSF: production KPI report for the logged-in agent, querying Corbee read-only DB
 class Api::V1::Accounts::Opensf::ProductionController < Api::V1::Accounts::BaseController
   def kpis
-    profile = OpensdfAgentProfile.find_by(user: current_user)
+    profile = OpensfAgentProfile.find_by(user: current_user)
     codigo = profile&.codigo_corretor.to_s.strip
 
     return render json: { error: 'codigo_corretor nao configurado' }, status: :unprocessable_entity if codigo.blank?

@@ -1,5 +1,5 @@
 # OPENSF: per-agent settings (broker code for Corbee production reports)
-class OpensdfAgentProfile < ApplicationRecord
+class OpensfAgentProfile < ApplicationRecord
   self.table_name = 'opensf_agent_profiles'
 
   belongs_to :user
