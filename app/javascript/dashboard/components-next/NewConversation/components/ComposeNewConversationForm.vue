@@ -16,6 +16,7 @@ import {
 } from 'dashboard/components-next/NewConversation/helpers/composeConversationHelper.js';
 // OPENSF: needed for all-inboxes fallback when no contact is selected
 import { useMapGetter } from 'dashboard/composables/store';
+import camelcaseKeys from 'camelcase-keys';
 
 import { useCopilotReply } from 'dashboard/composables/useCopilotReply';
 import { useKeyboardEvents } from 'dashboard/composables/useKeyboardEvents';
@@ -115,7 +116,7 @@ const effectiveChannelType = computed(() =>
 
 const validationRules = computed(() => ({
   // OPENSF: contact not required when user typed a phone/email (contact created on send)
-  selectedContact: { required: requiredIf(() => !props.rawContactInput) },
+  selectedContact: { required: requiredIf(!props.rawContactInput) },
   targetInbox: { required },
   message: { required: requiredIf(!inboxTypes.value.isWhatsapp) },
   subject: { required: requiredIf(inboxTypes.value.isEmail) },
@@ -154,7 +155,8 @@ const newMessagePayload = () => {
 const contactableInboxesList = computed(() => {
   // OPENSF: when no contact is resolved but user typed a phone/email, show all inboxes
   if (!props.selectedContact && props.rawContactInput) {
-    return buildContactableInboxesList(inboxesList.value);
+    const camelInboxes = camelcaseKeys(inboxesList.value, { deep: true });
+    return buildContactableInboxesList(camelInboxes);
   }
   return buildContactableInboxesList(props.selectedContact?.contactInboxes);
 });
