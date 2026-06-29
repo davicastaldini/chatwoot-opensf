@@ -161,11 +161,13 @@ const editAgent = async () => {
 };
 
 // OPENSF: fetch and save codigo_corretor via agent_profile endpoint
-const accountId = computed(() => store.getters['auth/getCurrentUser']?.account_id);
+const currentUser = useMapGetter('getCurrentUser');
+const accountId = computed(() => currentUser.value?.account_id
+  || window.location.pathname.match(/accounts\/(\d+)/)?.[1]);
 const opensdfProfileUrl = computed(
   () => `/api/v1/accounts/${accountId.value}/opensf/agent_profile?user_id=${props.id}`
 );
-const accessToken = computed(() => store.getters['auth/getCurrentUser']?.access_token);
+const accessToken = computed(() => currentUser.value?.access_token);
 
 onMounted(async () => {
   try {

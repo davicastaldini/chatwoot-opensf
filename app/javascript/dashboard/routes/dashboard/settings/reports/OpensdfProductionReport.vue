@@ -1,12 +1,11 @@
 <script setup>
 // OPENSF: KPI de produção individual do agente (propostas Corbee via codigo_corretor)
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAlert } from 'dashboard/composables';
-import { useStore } from 'dashboard/composables/store';
+import { useMapGetter } from 'dashboard/composables/store';
 
 const { t } = useI18n();
-const store = useStore();
 
 const kpis = ref(null);
 const codigoCorretor = ref('');
@@ -15,15 +14,16 @@ const savingCodigo = ref(false);
 const loading = ref(false);
 const notConfigured = ref(false);
 
-const accountId = store.getters['auth/getCurrentUser']?.account_id
-  || window.location.pathname.match(/accounts\/(\d+)/)?.[1];
-
-const apiBase = `/api/v1/accounts/${accountId}/opensf`;
+const currentUser = useMapGetter('getCurrentUser');
+const accountId = computed(() => currentUser.value?.account_id
+  || window.location.pathname.match(/accounts\/(\d+)/)?.[1]);
+const accessToken = computed(() => currentUser.value?.access_token);
+const apiBase = computed(() => `/api/v1/accounts/${accountId.value}/opensf`);
 
 async function fetchProfile() {
   try {
-    const res = await fetch(`${apiBase}/agent_profile`, {
-      headers: { api_access_token: store.getters['auth/getCurrentUser']?.access_token },
+    const res = await fetch(`${apiBase.value}/agent_profile`, {
+      headers: { api_access_token: accessToken.value },
     });
     const data = await res.json();
     codigoCorretor.value = data.codigo_corretor || '';
@@ -36,8 +36,8 @@ async function fetchKpis() {
   loading.value = true;
   notConfigured.value = false;
   try {
-    const res = await fetch(`${apiBase}/production/kpis`, {
-      headers: { api_access_token: store.getters['auth/getCurrentUser']?.access_token },
+    const res = await fetch(`${apiBase.value}/production/kpis`, {
+      headers: { api_access_token: accessToken.value },
     });
     const data = await res.json();
     if (data.error) {
@@ -55,11 +55,11 @@ async function fetchKpis() {
 async function saveCodigo() {
   savingCodigo.value = true;
   try {
-    const res = await fetch(`${apiBase}/agent_profile`, {
+    const res = await fetch(`${apiBase.value}/agent_profile`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
-        api_access_token: store.getters['auth/getCurrentUser']?.access_token,
+        api_access_token: accessToken.value,
       },
       body: JSON.stringify({ codigo_corretor: codigoCorretor.value }),
     });
