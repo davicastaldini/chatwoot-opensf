@@ -14,6 +14,8 @@ import {
   prepareNewMessagePayload,
   prepareWhatsAppMessagePayload,
 } from 'dashboard/components-next/NewConversation/helpers/composeConversationHelper.js';
+// OPENSF: needed for all-inboxes fallback when no contact is selected
+import { useMapGetter } from 'dashboard/composables/store';
 
 import { useCopilotReply } from 'dashboard/composables/useCopilotReply';
 import { useKeyboardEvents } from 'dashboard/composables/useKeyboardEvents';
@@ -42,6 +44,8 @@ const props = defineProps({
   messageSignature: { type: String, default: '' },
   sendWithSignature: { type: Boolean, default: false },
   formState: { type: Object, required: true },
+  // OPENSF: raw phone/email typed in contact field — enables inbox selection without a resolved contact
+  rawContactInput: { type: String, default: '' },
 });
 
 const emit = defineEmits([
@@ -53,6 +57,9 @@ const emit = defineEmits([
   'clearSelectedContact',
   'createConversation',
 ]);
+
+// OPENSF: fallback to all inboxes when no contact is selected
+const inboxesList = useMapGetter('inboxes/getInboxes');
 
 const DEFAULT_FORMATTING = 'Context::Default';
 
@@ -107,7 +114,8 @@ const effectiveChannelType = computed(() =>
 );
 
 const validationRules = computed(() => ({
-  selectedContact: { required },
+  // OPENSF: contact not required when user typed a phone/email (contact created on send)
+  selectedContact: { required: requiredIf(() => !props.rawContactInput) },
   targetInbox: { required },
   message: { required: requiredIf(!inboxTypes.value.isWhatsapp) },
   subject: { required: requiredIf(inboxTypes.value.isEmail) },
@@ -144,6 +152,10 @@ const newMessagePayload = () => {
 };
 
 const contactableInboxesList = computed(() => {
+  // OPENSF: when no contact is resolved but user typed a phone/email, show all inboxes
+  if (!props.selectedContact && props.rawContactInput) {
+    return buildContactableInboxesList(inboxesList.value);
+  }
   return buildContactableInboxesList(props.selectedContact?.contactInboxes);
 });
 
@@ -294,9 +306,14 @@ const handleSendMessage = async () => {
   if (!isValid) return;
 
   try {
+    // OPENSF: when contact not resolved, pass rawContactInput so parent creates it first
+    const payload = props.selectedContact
+      ? newMessagePayload()
+      : { rawContactInput: props.rawContactInput, targetInbox: props.targetInbox, message: state.message };
     const success = await emit('createConversation', {
-      payload: newMessagePayload(),
+      payload,
       isFromWhatsApp: false,
+      needsContactCreation: !props.selectedContact && !!props.rawContactInput,
     });
     if (success) {
       clearForm();
@@ -390,6 +407,7 @@ useKeyboardEvents({
         :contactable-inboxes-list="contactableInboxesList"
         :has-errors="validationStates.isInboxInvalid"
         :is-fetching-inboxes="isFetchingInboxes"
+        :has-contact-input="!!rawContactInput"
         @update-inbox="removeTargetInbox"
         @toggle-dropdown="showInboxesDropdown = $event"
         @handle-inbox-action="handleInboxAction"

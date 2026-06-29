@@ -14,6 +14,7 @@ import {
   fetchContactableInboxes,
   processContactableInboxes,
   mergeInboxDetails,
+  prepareNewMessagePayload,
 } from 'dashboard/components-next/NewConversation/helpers/composeConversationHelper';
 
 import Popover from 'dashboard/components-next/popover/Popover.vue';
@@ -45,6 +46,7 @@ const targetInbox = ref(null);
 const isCreatingContact = ref(false);
 const isFetchingInboxes = ref(false);
 const isSearching = ref(false);
+const rawContactInput = ref(''); // OPENSF: track raw phone/email input for contact-less send
 
 const formState = reactive({
   message: '',
@@ -83,6 +85,7 @@ const activeContact = computed(() => contactById.value(props.contactId));
 
 const onContactSearch = debounce(
   async query => {
+    rawContactInput.value = query; // OPENSF: keep raw input for contact-less send
     isSearching.value = true;
     contacts.value = [];
     try {
@@ -105,6 +108,7 @@ const resetContacts = () => {
 };
 
 const handleSelectedContact = async ({ value, action, ...rest }) => {
+  rawContactInput.value = ''; // OPENSF: contact resolved, clear raw input
   let contact;
   if (action === 'create') {
     isCreatingContact.value = true;
@@ -146,6 +150,7 @@ const handleTargetInbox = inbox => {
 const clearSelectedContact = () => {
   selectedContact.value = null;
   targetInbox.value = null;
+  rawContactInput.value = ''; // OPENSF: clear raw input when contact is cleared
   clearFormState();
 };
 
@@ -166,7 +171,31 @@ const discardCompose = () => {
   closeCompose();
 };
 
-const createConversation = async ({ payload, isFromWhatsApp }) => {
+const createConversation = async ({ payload, isFromWhatsApp, needsContactCreation }) => {
+  // OPENSF: create contact on-the-fly when user typed phone/email but didn't select existing contact
+  if (needsContactCreation && payload?.rawContactInput) {
+    isCreatingContact.value = true;
+    let contact;
+    try {
+      contact = await createNewContact(payload.rawContactInput);
+      isCreatingContact.value = false;
+    } catch (error) {
+      isCreatingContact.value = false;
+      useAlert(t('COMPOSE_NEW_CONVERSATION.CONTACT_SEARCH.ERROR_MESSAGE'));
+      return false;
+    }
+    selectedContact.value = contact;
+    rawContactInput.value = '';
+    payload = prepareNewMessagePayload({
+      targetInbox: payload.targetInbox,
+      selectedContact: contact,
+      message: payload.message,
+      currentUser: currentUser.value,
+      attachedFiles: formState.attachedFiles,
+      directUploadsEnabled: directUploadsEnabled.value,
+    });
+  }
+
   try {
     const data = await store.dispatch('contactConversations/create', {
       params: payload,
@@ -256,6 +285,7 @@ onMounted(() => resetContacts());
         :contacts-ui-flags="contactsUiFlags"
         :message-signature="messageSignature"
         :send-with-signature="sendWithSignature"
+        :raw-contact-input="rawContactInput"
         @search-contacts="onContactSearch"
         @reset-contact-search="resetContacts"
         @update-selected-contact="handleSelectedContact"

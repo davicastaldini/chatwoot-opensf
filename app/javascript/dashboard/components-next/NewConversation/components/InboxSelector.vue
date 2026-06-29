@@ -33,6 +33,11 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  // OPENSF: allow inbox selection when phone number is typed but contact not yet created
+  hasContactInput: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const emit = defineEmits([
@@ -83,7 +88,7 @@ const targetInboxLabel = computed(() => {
         variant="link"
         size="sm"
         :color="hasErrors ? 'ruby' : 'slate'"
-        :disabled="!selectedContact"
+        :disabled="!selectedContact && !hasContactInput"
         class="hover:!no-underline"
         @click="emit('toggleDropdown', !showInboxesDropdown)"
       />
