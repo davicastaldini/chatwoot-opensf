@@ -309,7 +309,7 @@ const handleSendMessage = async () => {
   console.log('[OPENSF] handleSendMessage called', { selectedContact: props.selectedContact, rawContactInput: props.rawContactInput, targetInbox: props.targetInbox, message: state.message });
   const isValid = await v$.value.$validate();
   // eslint-disable-next-line no-console
-  console.log('[OPENSF] validation result', isValid, v$.value.$errors);
+  console.log('[OPENSF] validation result', isValid, JSON.stringify(v$.value.$errors.map(e => ({ field: e.$property, rule: e.$validator, msg: e.$message }))));
   if (!isValid) return;
 
   try {
