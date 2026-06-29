@@ -15,27 +15,25 @@ class Api::V1::Accounts::Opensf::ProductionController < Api::V1::Accounts::BaseC
 
   private
 
-  PAID_STATUSES = ['Pago pelo Banco', 'Averbada'].freeze
-
   def corbee_kpis(codigo)
     conn = corbee_connection
     mes_inicio = Date.today.beginning_of_month.to_s
     mes_fim    = Date.today.end_of_month.to_s
 
-    # Main aggregation for current month
-    result = conn.exec_params(<<~SQL, [codigo, mes_inicio, mes_fim, *PAID_STATUSES])
+    # Main aggregation for current month — paid statuses hardcoded as constants
+    result = conn.exec_params(<<~SQL, [codigo, mes_inicio, mes_fim])
       SELECT
-        COUNT(*)                                                         AS total_propostas,
-        COALESCE(SUM(valor_producao), 0)                                AS producao_total,
-        COALESCE(SUM(valor_liquido), 0)                                 AS valor_liquido_total,
-        COUNT(*) FILTER (WHERE desc_status_proposta = ANY($4::text[]))  AS pagas_count,
+        COUNT(*)                                                                          AS total_propostas,
+        COALESCE(SUM(valor_producao), 0)                                                 AS producao_total,
+        COALESCE(SUM(valor_liquido), 0)                                                  AS valor_liquido_total,
+        COUNT(*) FILTER (WHERE desc_status_proposta IN ('Pago pelo Banco', 'Averbada'))  AS pagas_count,
         COALESCE(
-          SUM(valor_producao) FILTER (WHERE desc_status_proposta = ANY($4::text[])), 0
-        )                                                               AS pagas_valor
+          SUM(valor_producao) FILTER (WHERE desc_status_proposta IN ('Pago pelo Banco', 'Averbada')), 0
+        )                                                                                AS pagas_valor
       FROM public.propostas_corbee
       WHERE codigo_corretor::text = $1
-        AND data_proposta >= $2
-        AND data_proposta <= $3
+        AND data_proposta::date >= $2::date
+        AND data_proposta::date <= $3::date
     SQL
 
     row = result[0]
