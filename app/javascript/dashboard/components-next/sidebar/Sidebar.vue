@@ -434,6 +434,14 @@ const menuItems = computed(() => {
         },
       ],
     },
+    // OPENSF: agenda de retornos e tarefas
+    {
+      name: 'Agenda',
+      label: 'Agenda',
+      icon: 'i-lucide-calendar-check',
+      to: accountScopedRoute('opensf_agenda'),
+      activeOn: ['opensf_agenda'],
+    },
     {
       name: 'Captain',
       icon: 'i-woot-captain',
