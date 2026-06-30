@@ -51,8 +51,8 @@ RSpec.describe 'Webhooks::WhatsappController', type: :request do
 
   describe 'POST /webhooks/whatsapp/{:phone_number}' do
     it 'calls the whatsapp events job with the params for a valid signature' do
-      allow(Webhooks::WhatsappEventsWorker).to receive(:perform_async)
-      expect(Webhooks::WhatsappEventsWorker).to receive(:perform_async)
+      allow(Webhooks::WhatsappEventsJob).to receive(:perform_now)
+      expect(Webhooks::WhatsappEventsJob).to receive(:perform_now)
       post_whatsapp_webhook('/webhooks/whatsapp/123221321', body)
       expect(response).to have_http_status(:success)
     end
@@ -62,8 +62,8 @@ RSpec.describe 'Webhooks::WhatsappController', type: :request do
       channel.provider_config = channel.provider_config.merge('app_secret' => channel_secret)
       channel.save!
 
-      allow(Webhooks::WhatsappEventsWorker).to receive(:perform_async)
-      expect(Webhooks::WhatsappEventsWorker).to receive(:perform_async)
+      allow(Webhooks::WhatsappEventsJob).to receive(:perform_now)
+      expect(Webhooks::WhatsappEventsJob).to receive(:perform_now)
 
       channel_body = {
         object: 'whatsapp_business_account',
@@ -91,8 +91,8 @@ RSpec.describe 'Webhooks::WhatsappController', type: :request do
 
     it 'skips signature validation for 360dialog channels' do
       dialog_channel = create(:channel_whatsapp, provider: 'default', sync_templates: false, validate_provider_config: false)
-      allow(Webhooks::WhatsappEventsWorker).to receive(:perform_async)
-      expect(Webhooks::WhatsappEventsWorker).to receive(:perform_async)
+      allow(Webhooks::WhatsappEventsJob).to receive(:perform_now)
+      expect(Webhooks::WhatsappEventsJob).to receive(:perform_now)
 
       post_unsigned_whatsapp_webhook("/webhooks/whatsapp/#{dialog_channel.phone_number}", body)
 
@@ -103,8 +103,8 @@ RSpec.describe 'Webhooks::WhatsappController', type: :request do
       channel.update!(
         provider_config: channel.provider_config.except('app_secret', 'app_secret_key', 'api_secret', 'client_secret', 'source')
       )
-      allow(Webhooks::WhatsappEventsWorker).to receive(:perform_async)
-      expect(Webhooks::WhatsappEventsWorker).to receive(:perform_async)
+      allow(Webhooks::WhatsappEventsJob).to receive(:perform_now)
+      expect(Webhooks::WhatsappEventsJob).to receive(:perform_now)
 
       channel_body = {
         object: 'whatsapp_business_account',
@@ -126,7 +126,7 @@ RSpec.describe 'Webhooks::WhatsappController', type: :request do
     end
 
     it 'returns unauthorized when signature is missing' do
-      allow(Webhooks::WhatsappEventsWorker).to receive(:perform_async)
+      allow(Webhooks::WhatsappEventsJob).to receive(:perform_now)
 
       with_modified_env WHATSAPP_APP_SECRET: client_secret do
         post '/webhooks/whatsapp/123221321',
@@ -135,16 +135,16 @@ RSpec.describe 'Webhooks::WhatsappController', type: :request do
       end
 
       expect(response).to have_http_status(:unauthorized)
-      expect(Webhooks::WhatsappEventsWorker).not_to have_received(:perform_async)
+      expect(Webhooks::WhatsappEventsJob).not_to have_received(:perform_now)
     end
 
     it 'returns unauthorized when signature is invalid' do
-      allow(Webhooks::WhatsappEventsWorker).to receive(:perform_async)
+      allow(Webhooks::WhatsappEventsJob).to receive(:perform_now)
 
       post_whatsapp_webhook('/webhooks/whatsapp/123221321', body, signature: 'sha256=invalid-signature')
 
       expect(response).to have_http_status(:unauthorized)
-      expect(Webhooks::WhatsappEventsWorker).not_to have_received(:perform_async)
+      expect(Webhooks::WhatsappEventsJob).not_to have_received(:perform_now)
     end
 
     context 'when phone number is in inactive list' do
@@ -168,8 +168,8 @@ RSpec.describe 'Webhooks::WhatsappController', type: :request do
       end
 
       it 'processes the webhook normally' do
-        allow(Webhooks::WhatsappEventsWorker).to receive(:perform_async)
-        expect(Webhooks::WhatsappEventsWorker).to receive(:perform_async)
+        allow(Webhooks::WhatsappEventsJob).to receive(:perform_now)
+        expect(Webhooks::WhatsappEventsJob).to receive(:perform_now)
 
         post_whatsapp_webhook('/webhooks/whatsapp/+1234567890', body)
         expect(response).to have_http_status(:success)
