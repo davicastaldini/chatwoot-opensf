@@ -20,13 +20,12 @@ export default defineConfig({
     },
   },
   resolve: { alias: aliases },
-  ...(publicHost
-    ? {
-        server: {
-          host: '0.0.0.0',
-          allowedHosts: [publicHost],
-          hmr: { host: publicHost, protocol: 'wss', clientPort: 443 },
-        },
-      }
-    : {}),
+  server: {
+    host: '0.0.0.0',
+    // 'vite' = hostname interno Docker usado pelo Rails proxy
+    allowedHosts: publicHost ? [publicHost, 'vite'] : ['vite'],
+    ...(publicHost
+      ? { hmr: { host: publicHost, protocol: 'wss', clientPort: 443 } }
+      : {}),
+  },
 });
