@@ -15,6 +15,7 @@
 # Since queues are declared without waits, the jobs in lower ranking queues will only be processed
 # if there are no jobs in higher ranking queues.
 :queues:
+  - whatsapp_webhooks
   - critical
   - high
   - medium
