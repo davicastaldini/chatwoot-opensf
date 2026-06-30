@@ -68,6 +68,25 @@ export default {
     getFrameId(index) {
       return `dashboard-app--frame-${this.position}-${index}`;
     },
+    frameUrl(url) {
+      if (!url) return '';
+
+      try {
+        const frameUrl = new URL(url, window.location.origin);
+        const isInsecureOpensfPage =
+          window.location.protocol === 'https:' &&
+          frameUrl.protocol === 'http:' &&
+          frameUrl.pathname.startsWith('/opensf/');
+
+        if (isInsecureOpensfPage) {
+          return `${window.location.origin}${frameUrl.pathname}${frameUrl.search}${frameUrl.hash}`;
+        }
+      } catch {
+        return url;
+      }
+
+      return url;
+    },
     onIframeLoad(index) {
       // A possible alternative is to use ref instead of document.getElementById
       // However, when ref is used together with v-for, the ref you get will be
@@ -97,7 +116,7 @@ export default {
       <iframe
         v-if="configItem.type === 'frame' && configItem.url"
         :id="getFrameId(index)"
-        :src="configItem.url"
+        :src="frameUrl(configItem.url)"
         @load="() => onIframeLoad(index)"
       />
     </div>
