@@ -105,7 +105,12 @@ class Api::V1::Accounts::ContactsController < Api::V1::Accounts::BaseController
                           :unprocessable_entity)
     end
 
-    @contact.destroy!
+    ActiveRecord::Base.transaction do
+      @contact.conversations.destroy_all
+      @contact.contact_inboxes.destroy_all
+      @contact.destroy!
+    end
+
     head :ok
   end
 
