@@ -186,14 +186,27 @@ const createConversation = async ({ payload, isFromWhatsApp, needsContactCreatio
     }
     selectedContact.value = contact;
     rawContactInput.value = '';
-    payload = prepareNewMessagePayload({
-      targetInbox: payload.targetInbox,
-      selectedContact: contact,
-      message: payload.message,
-      currentUser: currentUser.value,
-      attachedFiles: formState.attachedFiles,
-      directUploadsEnabled: directUploadsEnabled.value,
-    });
+    if (isFromWhatsApp) {
+      payload = {
+        inboxId: payload.targetInbox.id,
+        sourceId: payload.targetInbox.sourceId,
+        contactId: contact.id,
+        message: {
+          content: payload.message,
+          template_params: payload.templateParams,
+        },
+        assigneeId: currentUser.value.id,
+      };
+    } else {
+      payload = prepareNewMessagePayload({
+        targetInbox: payload.targetInbox,
+        selectedContact: contact,
+        message: payload.message,
+        currentUser: currentUser.value,
+        attachedFiles: formState.attachedFiles,
+        directUploadsEnabled: directUploadsEnabled.value,
+      });
+    }
   }
 
   try {

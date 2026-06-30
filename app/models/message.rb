@@ -397,6 +397,8 @@ class Message < ApplicationRecord
   def send_reply
     # FIXME: Giving it few seconds for the attachment to be uploaded to the service
     # active storage attaches the file only after commit
+    return ::SendReplyJob.perform_now(id) if conversation.inbox.whatsapp?
+
     attachments.blank? ? ::SendReplyJob.perform_later(id) : ::SendReplyJob.set(wait: 2.seconds).perform_later(id)
   end
 

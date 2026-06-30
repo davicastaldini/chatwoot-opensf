@@ -326,30 +326,54 @@ const handleSendMessage = async () => {
 };
 
 const handleSendWhatsappMessage = async ({ message, templateParams }) => {
-  const whatsappMessagePayload = prepareWhatsAppMessagePayload({
-    targetInbox: props.targetInbox,
-    selectedContact: props.selectedContact,
-    message,
-    templateParams,
-    currentUser: props.currentUser,
-  });
+  const isValid = await v$.value.$validate();
+  if (!isValid) return;
+
+  const whatsappMessagePayload = props.selectedContact
+    ? prepareWhatsAppMessagePayload({
+        targetInbox: props.targetInbox,
+        selectedContact: props.selectedContact,
+        message,
+        templateParams,
+        currentUser: props.currentUser,
+      })
+    : {
+        rawContactInput: props.rawContactInput,
+        targetInbox: props.targetInbox,
+        message,
+        templateParams,
+      };
+
   await emit('createConversation', {
     payload: whatsappMessagePayload,
     isFromWhatsApp: true,
+    needsContactCreation: !props.selectedContact && !!props.rawContactInput,
   });
 };
 
 const handleSendTwilioMessage = async ({ message, templateParams }) => {
-  const twilioMessagePayload = prepareWhatsAppMessagePayload({
-    targetInbox: props.targetInbox,
-    selectedContact: props.selectedContact,
-    message,
-    templateParams,
-    currentUser: props.currentUser,
-  });
+  const isValid = await v$.value.$validate();
+  if (!isValid) return;
+
+  const twilioMessagePayload = props.selectedContact
+    ? prepareWhatsAppMessagePayload({
+        targetInbox: props.targetInbox,
+        selectedContact: props.selectedContact,
+        message,
+        templateParams,
+        currentUser: props.currentUser,
+      })
+    : {
+        rawContactInput: props.rawContactInput,
+        targetInbox: props.targetInbox,
+        message,
+        templateParams,
+      };
+
   await emit('createConversation', {
     payload: twilioMessagePayload,
     isFromWhatsApp: true,
+    needsContactCreation: !props.selectedContact && !!props.rawContactInput,
   });
 };
 
