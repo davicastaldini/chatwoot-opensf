@@ -5,12 +5,10 @@ import { aliases, vueOptions } from './vite.shared';
 import yaml from '@rollup/plugin-yaml';
 
 // OPENSF: quando servido atrás de um domínio HTTPS (Traefik), o Vite precisa
-// permitir o host público e falar HMR por wss na mesma origem. Tudo via env,
-// pra não cravar o domínio no código (mantém o fork limpo p/ rebase).
-const publicHost =
-  process.env.VITE_RUBY_HTTPS === 'true' && process.env.VITE_RUBY_HOST
-    ? process.env.VITE_RUBY_HOST
-    : null;
+// permitir o host público e falar HMR por wss na mesma origem.
+// Usa OPENSF_PUBLIC_HOST (não VITE_RUBY_HOST) pra não interferir com o binding
+// interno do vite-ruby, que deve ficar em 0.0.0.0:3036.
+const publicHost = process.env.OPENSF_PUBLIC_HOST || null;
 
 export default defineConfig({
   plugins: [ruby(), vue(vueOptions), yaml()],
