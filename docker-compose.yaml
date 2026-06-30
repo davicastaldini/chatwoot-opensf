@@ -120,6 +120,11 @@ services:
       - POSTGRES_DB=chatwoot
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=chatwoot_dev
+    # OPENSF: alias único p/ evitar conflito de nome com serviços Swarm na RedeOpen
+    networks:
+      default:
+        aliases:
+          - chatwoot-postgres
 
   redis:
     image: redis:alpine
