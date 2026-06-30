@@ -42,6 +42,19 @@ services:
       - RAILS_ENV=development
     entrypoint: docker/entrypoints/rails.sh
     command: ["bundle", "exec", "rails", "s", "-p", "3000", "-b", "0.0.0.0"]
+    # OPENSF: expõe o Rails no domínio via Traefik (rede RedeOpen)
+    networks:
+      - default
+      - RedeOpen
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=RedeOpen"
+      - "traefik.http.routers.chatwoot.rule=Host(`${CHATWOOT_HOSTNAME}`)"
+      - "traefik.http.routers.chatwoot.entrypoints=websecure"
+      - "traefik.http.routers.chatwoot.tls.certresolver=letsencryptresolver"
+      - "traefik.http.routers.chatwoot.service=chatwoot"
+      - "traefik.http.services.chatwoot.loadbalancer.server.port=3000"
+      - "traefik.http.services.chatwoot.loadbalancer.passHostHeader=true"
 
   sidekiq:
     <<: *base
@@ -80,7 +93,21 @@ services:
       - NODE_ENV=development
       - RAILS_ENV=development
     entrypoint: docker/entrypoints/vite.sh
-    command: bin/vite dev
+    command: bin/vite dev --host 0.0.0.0
+    # OPENSF: serve os assets do Vite no mesmo domínio, sob /vite-dev (via Traefik)
+    networks:
+      - default
+      - RedeOpen
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=RedeOpen"
+      - "traefik.http.routers.chatwootvite.rule=Host(`${CHATWOOT_HOSTNAME}`) && PathPrefix(`/vite-dev`)"
+      - "traefik.http.routers.chatwootvite.entrypoints=websecure"
+      - "traefik.http.routers.chatwootvite.tls.certresolver=letsencryptresolver"
+      - "traefik.http.routers.chatwootvite.service=chatwootvite"
+      - "traefik.http.routers.chatwootvite.priority=100"
+      - "traefik.http.services.chatwootvite.loadbalancer.server.port=3036"
+      - "traefik.http.services.chatwootvite.loadbalancer.passHostHeader=true"
 
   postgres:
     image: pgvector/pgvector:pg16
@@ -117,3 +144,9 @@ volumes:
   node_modules:
   cache:
   bundle:
+
+# OPENSF: rede do Traefik (já existe na VPS como overlay attachable)
+networks:
+  default:
+  RedeOpen:
+    external: true
