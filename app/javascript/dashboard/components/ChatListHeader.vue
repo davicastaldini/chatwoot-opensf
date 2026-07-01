@@ -66,7 +66,7 @@ const toggleConversationLayout = () => {
     <div class="flex items-center justify-center min-w-0">
       <!-- OPENSF UI: decorative workspace brand mark, safe to remove with the visual layer. -->
       <img
-        src="/brand-assets/opensf-mark.png"
+        :src="'/brand-assets/opensf-mark.png'"
         alt=""
         aria-hidden="true"
         class="opensf-workspace-mark"
