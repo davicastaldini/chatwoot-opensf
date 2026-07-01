@@ -10,7 +10,7 @@ class Webhooks::WhatsappController < ActionController::API
       return
     end
 
-    Webhooks::WhatsappEventsWorker.perform_async(params.to_unsafe_hash.as_json)
+    Webhooks::WhatsappEventsJob.perform_now(params.to_unsafe_hash.as_json.with_indifferent_access)
     head :ok
   end
 
