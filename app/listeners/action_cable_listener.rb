@@ -233,7 +233,20 @@ class ActionCableListener < BaseListener
     # Useful in cases like conversation assignment for generating a notification with assigner name.
     payload[:performer] = Current.user&.push_event_data if Current.user.present?
 
-    ::ActionCableBroadcastJob.perform_later(tokens.uniq, event_name, payload)
+    if inline_broadcast_event?(event_name)
+      ::ActionCableBroadcastJob.perform_now(tokens.uniq, event_name, payload)
+    else
+      ::ActionCableBroadcastJob.perform_later(tokens.uniq, event_name, payload)
+    end
+  end
+
+  def inline_broadcast_event?(event_name)
+    [
+      MESSAGE_CREATED,
+      MESSAGE_UPDATED,
+      CONVERSATION_UPDATED,
+      CONVERSATION_STATUS_CHANGED
+    ].include?(event_name)
   end
 end
 
