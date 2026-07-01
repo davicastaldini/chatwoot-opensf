@@ -102,7 +102,11 @@ export default {
 
 <!-- eslint-disable-next-line vue/no-root-v-if -->
 <template>
-  <div v-if="hasOpenedAtleastOnce" class="dashboard-app--container">
+  <!-- OPENSF UI: reversible visual frame for dashboard apps inside the agent workspace. -->
+  <div
+    v-if="hasOpenedAtleastOnce"
+    class="opensf-dashboard-app-frame dashboard-app--container"
+  >
     <div
       v-for="(configItem, index) in config"
       :key="index"
