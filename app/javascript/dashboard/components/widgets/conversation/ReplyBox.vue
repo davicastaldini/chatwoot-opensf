@@ -1245,12 +1245,7 @@ export default {
 
 <template>
   <ReplyBoxBanner :message="message" :is-on-private-note="isOnPrivateNote" />
-  <!-- OPENSF UI: reversible visual treatment for the composer. -->
-  <div
-    ref="replyEditor"
-    class="opensf-reply-box reply-box"
-    :class="replyBoxClass"
-  >
+  <div ref="replyEditor" class="reply-box" :class="replyBoxClass">
     <ReplyTopPanel
       :mode="replyType"
       :conversation-id="conversationId"

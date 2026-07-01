@@ -195,8 +195,7 @@ export default {
 </script>
 
 <template>
-  <!-- OPENSF UI: reversible visual scope for the agent workspace. -->
-  <section class="opensf-agent-workspace flex w-full h-full min-w-0">
+  <section class="flex w-full h-full min-w-0">
     <ChatList
       :show-conversation-list="showConversationList"
       :conversation-inbox="inboxId"

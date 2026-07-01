@@ -58,19 +58,12 @@ const toggleConversationLayout = () => {
 
 <template>
   <div
-    class="opensf-chat-list-header flex items-center justify-between gap-2 px-3 h-[3.25rem]"
+    class="flex items-center justify-between gap-2 px-3 h-[3.25rem]"
     :class="{
       'border-b border-n-strong': hasAppliedFiltersOrActiveFolders,
     }"
   >
     <div class="flex items-center justify-center min-w-0">
-      <!-- OPENSF UI: decorative workspace brand mark, safe to remove with the visual layer. -->
-      <img
-        src="/brand-assets/opensf-mark.png"
-        alt=""
-        aria-hidden="true"
-        class="opensf-workspace-mark"
-      />
       <h1
         class="text-base font-medium truncate text-n-slate-12"
         :title="pageTitle"

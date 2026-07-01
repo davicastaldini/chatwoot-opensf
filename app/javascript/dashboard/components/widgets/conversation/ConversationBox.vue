@@ -90,9 +90,8 @@ export default {
 </script>
 
 <template>
-  <!-- OPENSF UI: reversible visual shell for the active conversation. -->
   <div
-    class="opensf-conversation-shell conversation-details-wrap flex flex-col min-w-0 w-full bg-n-surface-1 relative"
+    class="conversation-details-wrap flex flex-col min-w-0 w-full bg-n-surface-1 relative"
     :class="{
       'border-l rtl:border-l-0 rtl:border-r border-n-weak': !isOnExpandedLayout,
     }"
