@@ -49,6 +49,7 @@ class Whatsapp::IncomingMessageBaseService
   def process_statuses
     status = @processed_params[:statuses].first
     return unless find_message_by_source_id(status[:id])
+    return if @message.conversation.blank?
 
     update_whatsapp_identifiers_from_status(status)
     update_message_with_status(@message, status)
